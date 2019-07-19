@@ -130,7 +130,7 @@ public class Branch {
         System.out.print("Please type in a customer name for searching: ");
         String customerName = SCANNER.next();
 
-        if(customerIsOnFile(customerName)) {
+        if(customerIsOnFile(customerName) || loadListOfTransactions(customerName).exists()) {
             System.out.println("Name: " + customerName);
             System.out.println("Transactions: ");
             displayListOfTransactions(customerName);
@@ -149,10 +149,7 @@ public class Branch {
      */
     private boolean customerIsOnFile(String customerName) {
         boolean customerFound = false;
-        if(this.getBank().loadListOfCustomers(this.getBranchName()).exists()) {
-            customerFound = true;
-        }
-        else if(this.listOfCustomers.isEmpty()) {
+        if(this.listOfCustomers.isEmpty()) {
             System.out.println("Error - there are no customers found for this branch.");
         }
         else {
