@@ -130,7 +130,7 @@ public class Branch {
         System.out.print("Please type in a customer name for searching: ");
         String customerName = SCANNER.next();
 
-        if(customerIsOnFile(customerName) || loadListOfTransactions(customerName).exists()) {
+        if(customerIsOnFile(customerName)) {
             System.out.println("Name: " + customerName);
             System.out.println("Transactions: ");
             displayListOfTransactions(customerName);
