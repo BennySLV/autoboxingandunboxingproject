@@ -9,7 +9,7 @@ import java.util.ArrayList;
  * and unboxing
  *
  * This class will represent a Customer object
- * for the Autoboxing and Unboxing challenge
+ * for the Autoboxing and Unboxing challenge.
  *
  * The class will contain the customer data
  * for use in the branches and for transaction
@@ -23,36 +23,17 @@ import java.util.ArrayList;
 public class Customer {
     private String name;
     private double transactionAmount;
-    private ArrayList<Double> listOfTransactions = new ArrayList<>();
+    private ArrayList<Double> listOfTransactions;
 
     /**
-     * Empty constructor
-     *
-     * This is needed to ensure that
-     * all object data can be ultimately
-     * stored and accessed by other classes
-     * when the program is running.
-     *
-     * It will therefore be overridden
-     * by the default constructor whenever
-     * a new customer will be created in the appropriate methods.
-     */
-    Customer() {}
-
-    /**
-     * Default constructor
+     * Constructor
      *
      * @param name The name of the customer
      */
     Customer(String name, double transactionAmount) {
         this.name = name;
         this.transactionAmount = transactionAmount;
-        if(transactionAmount > 0) {
-            addNewTransaction(transactionAmount);
-        }
-        else {
-            System.out.println("Error - cannot add transaction - needs to be greater than 0.00");
-        }
+        this.listOfTransactions = new ArrayList<>();
     }
 
     /**
@@ -100,6 +81,11 @@ public class Customer {
      * @param transactionAmount The initial transaction amount
      */
     void addNewTransaction(double transactionAmount) {
-        this.listOfTransactions.add(transactionAmount);
+        if(this.getTransactionAmount() > 0) {
+            this.listOfTransactions.add(transactionAmount);
+        }
+        else {
+            System.out.println("Error - cannot add transaction. The amount needs to be at least £0.01." );
+        }
     }
 }
