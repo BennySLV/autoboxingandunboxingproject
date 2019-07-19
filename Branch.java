@@ -1,5 +1,6 @@
 package Section6.AutoboxingAndUnboxingChallenge;
 
+import java.io.*;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Locale;
@@ -24,31 +25,17 @@ public class Branch {
     private String branchName;
     private Customer customer;
     private ArrayList<Customer> listOfCustomers;
+    private Bank bank;
 
     private static final Scanner SCANNER = new Scanner(System.in);
 
     /**
-     * Empty constructor
-     *
-     * This is needed to ensure that
-     * all object data can be ultimately
-     * stored and accessed by other classes
-     * when the program is running.
-     * It will therefore be overridden
-     *
-     * by the default constructor whenever
-     * a new branch will be created in the appropriate methods.
-     */
-    Branch() {}
-
-    /**
-     * Default constructor
+     * Constructor
      *
      * @param branchName The name of the branch
      */
     Branch(String branchName) {
         this.branchName = branchName;
-        this.customer = new Customer();
         this.listOfCustomers = new ArrayList<>();
     }
 
@@ -57,17 +44,8 @@ public class Branch {
      *
      * @return The current branch name
      */
-    public String getBranchName() {
+    String getBranchName() {
         return branchName;
-    }
-
-    /**
-     * Set the new branch name for the bank
-     *
-     * @param branchName The new branch name
-     */
-    public void setBranchName(String branchName) {
-        this.branchName = branchName;
     }
 
     /**
@@ -84,40 +62,42 @@ public class Branch {
      *
      * @return The current list of customers
      */
-    private ArrayList<Customer> getListOfCustomers() {
+    ArrayList<Customer> getListOfCustomers() {
         return listOfCustomers;
     }
 
     /**
+     * Get the data for each Bank object that has been created.
+     *
+     * @return The Bank data
+     */
+    public Bank getBank() {
+        return bank;
+    }
+
+    /**
      * Add a new customer
-     * to the branch
+     * to the branch.
      *
      * This method also performs validation
-     * checks to ensure that there are no duplicate customers
+     * checks to ensure that there are no duplicate customers.
      */
     void addNewCustomer() {
-        System.out.print("Please enter the number of customers that you wish to add: ");
-        int numberOfCustomers = SCANNER.nextInt();
-        String customerName;
+        System.out.print("Please enter the customer's name: ");
+        String customerName = SCANNER.next();
+        System.out.print("Please enter the initial transaction amount for that customer: ");
+        double transactionAmount = SCANNER.nextDouble();
 
-        for(int i = 0; i < numberOfCustomers; i++) {
-            System.out.println("\nPlease enter the following details for the new customer");
-            System.out.print("\nCustomer name: ");
-            customerName = SCANNER.next();
-            System.out.print("Transaction amount: ");
-            double transactionAmount = SCANNER.nextDouble();
-
-            for(int j = 0; j < this.listOfCustomers.size(); j++) {
-                if(this.customerIsOnFile(customerName)) {
-                    System.out.println("Error - customer already exists.");
-                }
-            }
+        if(!customerName.isEmpty()) {
             this.customer = new Customer(customerName, transactionAmount);
             this.listOfCustomers.add(this.customer);
+            this.customer.addNewTransaction(transactionAmount);
             System.out.println("Customer has been added successfully.");
-            this.displayListOfCustomers();
+            this.saveListOfTransactions(customerName);
         }
-        this.addAdditionalTransaction();
+        else {
+            System.out.println("Customer not added - no name entered.");
+        }
     }
 
     /**
@@ -125,11 +105,12 @@ public class Branch {
      * an existing customer
      */
     void removeCustomer() {
-        System.out.print("Please select the customer that you wish to remove (using the name): ");
+        System.out.print("Please select the customer that you wish to remove (using their name): ");
         String customerName = SCANNER.nextLine();
         for(int i = 0; i < this.listOfCustomers.size(); i++) {
-            if(this.customerIsOnFile(customerName)) {
+            if(customerIsOnFile(customerName)) {
                 this.listOfCustomers.remove(i);
+                break;
             }
             else {
                 System.out.println("Error - customer not found.");
@@ -147,7 +128,8 @@ public class Branch {
      */
     void searchForCustomer() {
         System.out.print("Please type in a customer name for searching: ");
-        String customerName = SCANNER.nextLine();
+        String customerName = SCANNER.next();
+
         if(customerIsOnFile(customerName)) {
             System.out.println("Name: " + customerName);
             System.out.println("Transactions: ");
@@ -163,20 +145,21 @@ public class Branch {
      * is found on the system
      *
      * @param customerName The name of the customer to be found
-     * @return The result
+     * @return The search result
      */
     private boolean customerIsOnFile(String customerName) {
         boolean customerFound = false;
-        if(this.listOfCustomers.isEmpty()) {
+        if(this.getBank().loadListOfCustomers(this.getBranchName()).exists()) {
+            customerFound = true;
+        }
+        else if(this.listOfCustomers.isEmpty()) {
             System.out.println("Error - there are no customers found for this branch.");
         }
         else {
             for(int i = 0; i < this.listOfCustomers.size(); i++) {
                 if(this.listOfCustomers.get(i).getName().equalsIgnoreCase(customerName)) {
                     customerFound = true;
-                }
-                else {
-                    customerFound = false;
+                    break;
                 }
             }
         }
@@ -185,7 +168,7 @@ public class Branch {
 
     /**
      * Add an additional transaction to an account for an existing
-     * customer
+     * customer.
      *
      * Only add additional transactions if the customer's
      * list of transactions is not empty (i.e. an initial
@@ -197,56 +180,22 @@ public class Branch {
      * to either remove an existing transaction
      * or be redirected back to the main menu.
      */
-    private void addAdditionalTransaction() {
-        System.out.print("Would you like to add a new transaction for this customer? (Y / N): ");
-        String answer = SCANNER.next();
+    void addAdditionalTransaction() {
+        System.out.print("Please select the customer's name to add the additional transaction: ");
+        String customerName = SCANNER.next();
 
-        if(answer.equalsIgnoreCase("Y") || answer.equalsIgnoreCase("Yes")) {
-            System.out.print("Please select the customer's name to add the additional transaction: ");
-            String customerName = SCANNER.next();
-
-            if(customerIsOnFile(customerName)) {
-                if(!this.customer.getListOfTransactions().isEmpty()) {
-                    System.out.print("Please enter a new transaction amount for the customer: ");
-                    double transactionAmount = SCANNER.nextDouble();
-                    this.customer.addNewTransaction(transactionAmount);
-                    System.out.println("New transaction added successfully.");
-                    displayListOfTransactions(customerName);
-                    System.out.print("Continue adding further transactions? (Y / N): ");
-                }
-                else {
-                    System.out.println("Error - there must be an initial transaction before adding a new one.");
-                }
+        if(customerIsOnFile(customerName)) {
+            if(!this.getCustomer().getListOfTransactions().isEmpty()) {
+                System.out.print("Please enter a new transaction amount for the customer: ");
+                double transactionAmount = SCANNER.nextDouble();
+                this.getCustomer().addNewTransaction(transactionAmount);
+                System.out.println("New transaction added successfully.");
+                this.saveListOfTransactions(customerName);
             }
             else {
-                System.out.println("Error - customer not found.");
-            }
-
-        }
-        else if(answer.equalsIgnoreCase("N") || answer.equalsIgnoreCase("No")) {
-            System.out.print("Would you like to remove the current transaction from this customer (Y / N): ");
-            answer = SCANNER.next();
-            if(answer.equalsIgnoreCase("Y") || answer.equalsIgnoreCase("Yes")) {
-                removeAdditionalTransaction();
-            }
-            else if(answer.equalsIgnoreCase("N") || answer.equalsIgnoreCase("No")) {
-                System.out.println("Redirected back to the main menu...");
-                BankMain.runApplication();
-            }
-        }
-    }
-
-    /**
-     * Remove an additional transaction from
-     * a customer's existing current account
-     */
-    private void removeAdditionalTransaction() {
-        displayListOfCustomers();
-        System.out.println("Please select the customer's transaction that you wish to remove: ");
-        String customerName = SCANNER.nextLine();
-        if(customerIsOnFile(customerName)) {
-            for(int i = 0; i < this.customer.getListOfTransactions().size(); i++) {
-                this.customer.getListOfTransactions().remove(i);
+                System.out.println("Error - you must add a new customer with an initial transaction " +
+                        "first before adding a new transaction.");
+                this.addNewCustomer();
             }
         }
         else {
@@ -255,27 +204,108 @@ public class Branch {
     }
 
     /**
+     * Remove a transaction from
+     * a customer's existing current account.
+     *
+     * In this case, the most recent transaction
+     * will be removed from the system.
+     */
+    void removeTransaction() {
+        System.out.println("Please enter the customer's name to remove the transaction: ");
+        String customerName = SCANNER.next();
+        if(customerIsOnFile(customerName)) {
+            for(int i = 0; i < this.customer.getListOfTransactions().size(); i++) {
+                this.customer.getListOfTransactions().remove(i);
+            }
+            System.out.println("Transaction removed successfully.");
+        }
+        else {
+            System.out.println("Error - customer not found.");
+        }
+    }
+
+    /**
+     * Save the list of transactions to
+     * a text file.
+     *
+     * This text file will contain a list
+     * of transactions for a specific customer.
+     * Situated by a given customer name.
+     *
+     * @param customerName The name of the customer
+     * @return The saved file containing the specific customer's transactions
+     */
+    private File saveListOfTransactions(String customerName) {
+        File file = new File(customerName + "_transactions.txt");
+        try {
+            if(customerIsOnFile(customerName)) {
+                if(!this.getCustomer().getListOfTransactions().isEmpty()) {
+                    PrintWriter output = new PrintWriter(file);
+                    for(int i = 0; i < this.getCustomer().getListOfTransactions().size(); i++) {
+                        output.println(formatCurrencyToGbp(this.getCustomer().getListOfTransactions().get(i)));
+                    }
+                    output.close();
+                }
+                else {
+                    System.out.println("Error - the transaction list for this customer is empty. Aborting.");
+                }
+            }
+            else {
+                System.out.println("Error - customer not found.");
+            }
+        }
+        catch(IOException e) {
+            System.out.println(e.getMessage());
+        }
+        return file;
+    }
+
+    /**
+     * Load the text file containing the list of transactions
+     * for a specific customer.
+     *
+     * Specified by the customer's name.
+     *
+     * @param customerName The name of the customer
+     * @return The file containing the list of transactions for that specific customer
+     */
+    private File loadListOfTransactions(String customerName) {
+        File file = saveListOfTransactions(customerName);
+        try {
+            if(customerIsOnFile(customerName)) {
+                if(!this.getCustomer().getListOfTransactions().isEmpty()) {
+                    BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+                    String line;
+                    while((line = bufferedReader.readLine()) != null) {
+                        System.out.println(line);
+                    }
+                }
+                else {
+                    System.out.println("Error - transaction list is empty.");
+                }
+            }
+            else {
+                System.out.println("Error - customer not found.");
+            }
+        }
+        catch(IOException e) {
+            System.out.println(e.getMessage());
+        }
+        return file;
+    }
+
+    /**
      * Format the given transaction
      * amount to the currency of
      * Great British Pound (GBP).
      *
-     * @param amount The transaction amount to format
+     * @param transactionAmount The transaction amount to format
      * @return The formatted transaction amount in the GBP currency
      */
-    private String formatCurrencyToGbp(double amount) {
+    private String formatCurrencyToGbp(double transactionAmount) {
         Locale locale = new Locale("en", "GB");
         NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(locale);
-        return currencyFormatter.format(amount);
-    }
-
-    /**
-     * Display a list of customers for that branch
-     */
-    private void displayListOfCustomers() {
-        for(int i = 0; i < this.listOfCustomers.size(); i++) {
-            System.out.println("Name: " + this.getListOfCustomers().get(i).getName());
-            this.displayListOfTransactions(this.getListOfCustomers().get(i).getName());
-        }
+        return currencyFormatter.format(transactionAmount);
     }
 
     /**
@@ -284,9 +314,8 @@ public class Branch {
      * @param customerName The name of the customer
      */
     private void displayListOfTransactions(String customerName) {
-        System.out.println("List of transactions for '" + customerName + "':");
-        for(int i = 0; i < this.getCustomer().getListOfTransactions().size(); i++) {
-            System.out.println(formatCurrencyToGbp(this.getCustomer().getListOfTransactions().get(i)));
+        if(customerIsOnFile(customerName)) {
+            loadListOfTransactions(customerName);
         }
     }
 }
