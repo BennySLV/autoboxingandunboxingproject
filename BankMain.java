@@ -14,30 +14,69 @@ import java.util.Scanner;
  * @author Ben Silveston
  */
 public class BankMain {
-    private static Branch branch;
-    private static Bank bank;
-
+    private Bank bank;
     private static final Scanner SCANNER = new Scanner(System.in);
+
+    /**
+     * Constructor
+     *
+     * @param bank The bank object data
+     */
+    private BankMain(Bank bank) {
+        this.bank = bank;
+    }
 
     /**
      * Run the application
      */
-    static void runApplication() {
+    private void runApplication() {
         boolean applicationIsRunning = true;
         while(applicationIsRunning) {
-            System.out.println("Please select from the following four options: " +
+            System.out.println("Please select from the following eight options: " +
                     "\n\t 1 - Create a new branch" +
                     "\n\t 2 - Remove an existing branch" +
-                    "\n\t 3 - Close the application");
+                    "\n\t 3 - Add a new customer" +
+                    "\n\t 4 - Remove an existing customer" +
+                    "\n\t 5 - Add a new transaction" +
+                    "\n\t 6 - Remove an existing transaction" +
+                    "\n\t 7 - Search for an existing customer" +
+                    "\n\t 8 - Display all customers for a particular branch " +
+                    "\n\t 9 - Close the application");
+
             byte selection = SCANNER.nextByte();
             switch(selection) {
                 case 1:
                     bank.addBranch();
+                    runApplication();
                     break;
                 case 2:
                     bank.removeBranch();
+                    runApplication();
                     break;
                 case 3:
+                    bank.getBranch().addNewCustomer();
+                    runApplication();
+                    break;
+                case 4:
+                    bank.getBranch().removeCustomer();
+                    runApplication();
+                    break;
+                case 5:
+                    bank.getBranch().addAdditionalTransaction();
+                    runApplication();
+                    break;
+                case 6:
+                    bank.getBranch().removeTransaction();
+                    runApplication();
+                    break;
+                case 7:
+                    bank.getBranch().searchForCustomer();
+                    runApplication();
+                    break;
+                case 8:
+                    bank.displayAllCustomers();
+                    runApplication();
+                case 9:
                     closeApplication();
                     break;
             }
@@ -59,8 +98,7 @@ public class BankMain {
      * @param args The command-line arguments
      */
     public static void main(String[] args) {
-        bank = new Bank("Lloyds Bank");
-        branch = new Branch();
-        runApplication();
+        BankMain bankMain = new BankMain(new Bank("Lloyds Bank"));
+        bankMain.runApplication();
     }
 }
