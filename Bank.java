@@ -1,5 +1,6 @@
 package Section6.AutoboxingAndUnboxingChallenge;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -30,9 +31,18 @@ public class Bank {
      *
      * @param bankBrandName The brand name for the bank
      */
-    public Bank(String bankBrandName) {
+    Bank(String bankBrandName) {
         this.bankBrandName = bankBrandName;
         this.listOfBranches = new ArrayList<>();
+    }
+
+    /**
+     * Get the current bank brand name
+     *
+     * @return The current name
+     */
+    public String getBankBrandName() {
+        return bankBrandName;
     }
 
     /**
@@ -40,26 +50,8 @@ public class Bank {
      *
      * @return The branch object data
      */
-    public Branch getBranch() {
+    Branch getBranch() {
         return branch;
-    }
-
-    /**
-     * Get the current bank brand name
-     *
-     * @return The current brand name
-     */
-    public String getBankBrandName() {
-        return bankBrandName;
-    }
-
-    /**
-     * Set the new bank brand name
-     *
-     * @param bankBrandName The new brand name
-     */
-    public void setBankBrandName(String bankBrandName) {
-        this.bankBrandName = bankBrandName;
     }
 
     /**
@@ -79,22 +71,23 @@ public class Bank {
         this.branch = new Branch(branchName);
         this.listOfBranches.add(this.branch);
         System.out.println("Branch has been added successfully.");
-        System.out.println("\nList of added branches: ");
-        displayListOfBranches();
-        this.branch.addNewCustomer();
     }
 
     /**
-     * Remove a branch from the bank's
+     * Remove a single branch from the bank's
      * branch list
      *
      * Using the name as a reference
      */
     void removeBranch() {
-        displayListOfBranches();
-        System.out.print("Please remove an existing branch, using the branch name as a reference: ");
-        String branchName = SCANNER.next();
-        if(!this.listOfBranches.isEmpty()) {
+        if(this.listOfBranches.isEmpty()) {
+            System.out.println("Error - branch list is empty!");
+        }
+        else {
+            displayListOfBranches();
+            System.out.print("Please remove an existing branch, using the branch name as a reference: ");
+            String branchName = SCANNER.next();
+
             for(int i = 0; i < this.listOfBranches.size(); i++) {
                 if(branchName.equalsIgnoreCase(this.listOfBranches.get(i).getBranchName())) {
                     this.listOfBranches.remove(i);
@@ -102,9 +95,109 @@ public class Bank {
                 }
             }
         }
-        else {
-            System.out.println("Error - branch list is empty!");
+    }
+
+    /**
+     * Save the list of customers for
+     * each branch to a text file.
+     * Specified by the branch name.
+     *
+     * @param branchName The name of the branch
+     * @return The file containing the list of customers for that branch
+     */
+    private File saveListOfCustomers(String branchName) {
+        File file = new File(branchName + "_customers.txt");
+        try {
+            if(branchIsOnFile(branchName)) {
+                if(!this.getBranch().getListOfCustomers().isEmpty()) {
+                    PrintWriter output = new PrintWriter(file);
+                    for(int i = 0; i < this.getBranch().getListOfCustomers().size(); i++) {
+                        output.println(this.getBranch().getListOfCustomers().get(i));
+                    }
+                    output.close();
+                }
+                else {
+                    System.out.println("Error - the customer list for this branch is empty. Aborting.");
+                }
+            }
+            else {
+                System.out.println("Error - branch not found.");
+            }
         }
+        catch(IOException e) {
+            System.out.println(e.getMessage());
+        }
+        return file;
+    }
+
+    /**
+     * Load the list of customers
+     * for a given branch.
+     *
+     * Specified by the given branch name.
+     *
+     * @param branchName The name of the branch
+     * @return The file containing the customers for that specific branch
+     */
+    public File loadListOfCustomers(String branchName) {
+        File file = saveListOfCustomers(branchName);
+        try {
+            if(branchIsOnFile(branchName)) {
+                if(!this.getBranch().getListOfCustomers().isEmpty()) {
+                    BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+                    String line;
+                    while((line = bufferedReader.readLine()) != null) {
+                        System.out.println(line);
+                    }
+                }
+                else {
+                    System.out.println("Error - transaction list is empty.");
+                }
+            }
+            else {
+                System.out.println("Error - customer not found.");
+            }
+        }
+        catch(IOException e) {
+            System.out.println(e.getMessage());
+        }
+        return file;
+    }
+
+    /**
+     * Display all customers for a particular branch
+     */
+    void displayAllCustomers() {
+        System.out.print("Please type in a branch name for searching: ");
+        String branchName = SCANNER.next();
+        if(branchIsOnFile(branchName)) {
+            loadListOfCustomers(branchName);
+        }
+    }
+
+    /**
+     * Check if a specific branch has been added on the system
+     *
+     * @param branchName The name of the branch to be found
+     * @return The search result
+     */
+    private boolean branchIsOnFile(String branchName) {
+        boolean branchFound = false;
+        if(this.listOfBranches.isEmpty()) {
+            System.out.println("Error - branch list is empty.");
+        }
+        else {
+            for(int i = 0; i < this.listOfBranches.size(); i++) {
+                if(this.listOfBranches.get(i).getBranchName().equalsIgnoreCase(branchName)) {
+                    System.out.println("Branch: " + this.getBranch().getBranchName());
+                    branchFound = true;
+                }
+                else {
+                    System.out.println("Error - branch not found.");
+                }
+            }
+        }
+        return branchFound;
     }
 
     /**
@@ -112,14 +205,8 @@ public class Bank {
      * of branches for a particular bank
      */
     private void displayListOfBranches() {
-        if(this.listOfBranches.isEmpty()) {
-            System.out.println("Branch list is empty.");
-        }
-        else {
-            for(int i = 0; i < this.listOfBranches.size(); i++) {
-                System.out.println(this.listOfBranches.get(i).getBranchName());
-            }
+        for(int i = 0; i < this.listOfBranches.size(); i++) {
+            System.out.println(this.listOfBranches.get(i).getBranchName());
         }
     }
 }
-
