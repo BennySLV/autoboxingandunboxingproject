@@ -112,7 +112,7 @@ public class Bank {
                 if(!this.getBranch().getListOfCustomers().isEmpty()) {
                     PrintWriter output = new PrintWriter(file);
                     for(int i = 0; i < this.getBranch().getListOfCustomers().size(); i++) {
-                        output.println(this.getBranch().getListOfCustomers().get(i));
+                        output.println(this.getBranch().getListOfCustomers().get(i).getName());
                     }
                     output.close();
                 }
@@ -139,7 +139,7 @@ public class Bank {
      * @param branchName The name of the branch
      * @return The file containing the customers for that specific branch
      */
-    public File loadListOfCustomers(String branchName) {
+    private File loadListOfCustomers(String branchName) {
         File file = saveListOfCustomers(branchName);
         try {
             if(branchIsOnFile(branchName)) {
@@ -149,6 +149,7 @@ public class Bank {
                     while((line = bufferedReader.readLine()) != null) {
                         System.out.println(line);
                     }
+                    bufferedReader.close();
                 }
                 else {
                     System.out.println("Error - transaction list is empty.");
@@ -170,7 +171,8 @@ public class Bank {
     void displayAllCustomers() {
         System.out.print("Please type in a branch name for searching: ");
         String branchName = SCANNER.next();
-        if(branchIsOnFile(branchName)) {
+        System.out.println("Customers at '" + branchName + "' branch: ");
+        if(branchIsOnFile(branchName) || loadListOfCustomers(branchName).exists()) {
             loadListOfCustomers(branchName);
         }
     }
@@ -189,7 +191,6 @@ public class Bank {
         else {
             for(int i = 0; i < this.listOfBranches.size(); i++) {
                 if(this.listOfBranches.get(i).getBranchName().equalsIgnoreCase(branchName)) {
-                    System.out.println("Branch: " + this.getBranch().getBranchName());
                     branchFound = true;
                 }
                 else {
