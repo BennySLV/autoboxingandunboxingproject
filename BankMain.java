@@ -32,7 +32,7 @@ public class BankMain {
     private void runApplication() {
         boolean applicationIsRunning = true;
         while(applicationIsRunning) {
-            System.out.println("Please select from the following eight options: " +
+            System.out.println("Please select from the following nine options: " +
                     "\n\t 1 - Create a new branch" +
                     "\n\t 2 - Remove an existing branch" +
                     "\n\t 3 - Add a new customer" +
@@ -54,23 +54,23 @@ public class BankMain {
                     runApplication();
                     break;
                 case 3:
-                    bank.getBranch().addNewCustomer();
+                    bank.addNewCustomer();
                     runApplication();
                     break;
                 case 4:
-                    bank.getBranch().removeCustomer();
+                    bank.removeCustomer();
                     runApplication();
                     break;
                 case 5:
-                    bank.getBranch().addAdditionalTransaction();
+                    bank.addAdditionalTransaction();
                     runApplication();
                     break;
                 case 6:
-                    bank.getBranch().removeTransaction();
+                    bank.removeTransaction();
                     runApplication();
                     break;
                 case 7:
-                    bank.getBranch().searchForCustomer();
+                    bank.searchForCustomer();
                     runApplication();
                     break;
                 case 8:
